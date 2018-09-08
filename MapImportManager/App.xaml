@@ -1,0 +1,14 @@
+﻿<Application x:Class="MapImportManager.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <Image x:Key="OpenIcon" Source="images/open.png"></Image>
+        <Image x:Key="SaveIcon" Source="images/save.png"></Image>
+        <Image x:Key="FileImportIcon" Source="images/file.png"></Image>
+        <Image x:Key="DirectoryImportIcon" Source="images/dir.png"></Image>
+        <Image x:Key="EditIcon" Source="images/edit.png"></Image>
+        <Image x:Key="DeleteFileIcon" Source="images/del.png"></Image>
+        <Image x:Key="ExportIcon" Source="images/export.png"></Image>
+    </Application.Resources>
+</Application>

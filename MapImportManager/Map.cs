@@ -181,8 +181,11 @@ static class Map {
         if(StormLib.SFileOpenArchive(mapPath, 0u, 0u, out hMpq)) {
             for(int i = 0; i < fileList.Count; i++) {
                 var file = fileList[i];
-                if(!string.IsNullOrEmpty(file.OrigPath))
-                    StormLib.SFileExtractFile(hMpq, file.OrigPath, Path.Combine(destPath, file.Path), 0u);
+                if(!string.IsNullOrEmpty(file.OrigPath)) {
+                    var fp = Path.Combine(destPath, file.Path);
+                    Directory.CreateDirectory(Path.GetDirectoryName(fp));
+                    StormLib.SFileExtractFile(hMpq, file.OrigPath, fp, 0u);
+                }
             }
         }
         if(hMpq != IntPtr.Zero)

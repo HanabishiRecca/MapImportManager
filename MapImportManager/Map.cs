@@ -16,7 +16,7 @@ static class Map {
 
     public static List<ImportFile> GetImportList(string mapPath) {
         List<ImportFile> result = null;
-        var hMpq = IntPtr.Zero;
+        IntPtr hMpq;
         if(StormLib.SFileOpenArchive(mapPath, 0u, 0u, out hMpq)) {
             var impFile = DetectImpFile(hMpq);
             if(impFile != null)
@@ -31,26 +31,26 @@ static class Map {
     static List<ImportFile> ReadImportFile(IntPtr hMpq, string impFile) {
         List<ImportFile> result = null;
 
-        var hFile = IntPtr.Zero;
+        IntPtr hFile;
         if(StormLib.SFileOpenFileEx(hMpq, impFile, 0u, out hFile)) {
             var fSize = StormLib.SFileGetFileSize(hFile, 0u);
             if(fSize < 0xFFFFFFFFu) {
                 var buffer = Marshal.AllocHGlobal((int)fSize);
                 if(StormLib.SFileReadFile(hFile, buffer, fSize, 0u, IntPtr.Zero)) {
                     int offset = 0;
-                    if(Marshal.ReadInt32(buffer, offset) == 1) {
+                    var version = Marshal.ReadInt32(buffer, offset);
+                    if(version < 2) {
                         offset += sizeof(int);
                         var fileCount = Marshal.ReadInt32(buffer, offset);
                         offset += sizeof(int);
                         result = new List<ImportFile>(fileCount);
                         for(int i = 0; i < fileCount; i++) {
-                            var bt = Marshal.ReadByte(buffer, offset);
-                            offset++;
+                            var bt = (version > 0) && ((Marshal.ReadByte(buffer, offset++) & 1) > NulByte);
                             var strLen = SeekStrLen(buffer, offset, fSize);
                             var data = new byte[strLen];
                             Marshal.Copy(buffer + offset, data, 0, data.Length);
                             offset += strLen + 1;
-                            result.Add(new ImportFile(Encoding.UTF8.GetString(data), bt == CustomFlag));
+                            result.Add(new ImportFile(Encoding.UTF8.GetString(data), bt));
                         }
                     }
                 }
@@ -65,10 +65,9 @@ static class Map {
     }
 
     public static SaveResult SaveImportList(string mapPath, List<ImportFile> fileList) {
-        var data = GenImpFile(fileList);
         var result = new SaveResult();
         var saved = true;
-        var hMpq = IntPtr.Zero;
+        IntPtr hMpq;
         if(saved &= StormLib.SFileOpenArchive(mapPath, 0u, 0u, out hMpq)) {
             var failedFiles = new List<string>();
             for(int i = 0; (i < fileList.Count) && saved; i++) {
@@ -111,7 +110,7 @@ static class Map {
         Marshal.Copy(data, 0, buffer, data.Length);
 
         var result = true;
-        var hFile = IntPtr.Zero;
+        IntPtr hFile;
         if(result &= StormLib.SFileCreateFile(hMpq, impFile, 0ul, (uint)data.Length, 0u, 0x80000200u, out hFile))
             result &= StormLib.SFileWriteFile(hFile, buffer, (uint)data.Length, 0x2u);
 
@@ -158,7 +157,7 @@ static class Map {
         string impFile = null;
         for(int i = 0; (i < archTypes.Length) && (impFile == null); i++) {
             var archType = archTypes[i];
-            var hFile = IntPtr.Zero;
+            IntPtr hFile;
             if(StormLib.SFileOpenFileEx(hMpq, archType.DetectFile, 0u, out hFile) && (StormLib.SFileGetFileSize(hFile, 0u) < 0xFFFFFFFFu))
                 impFile = archType.ImpFile;
 
@@ -177,7 +176,7 @@ static class Map {
     }
 
     public static void Export(string mapPath, List<ImportFile> fileList, string destPath) {
-        var hMpq = IntPtr.Zero;
+        IntPtr hMpq;
         if(StormLib.SFileOpenArchive(mapPath, 0u, 0u, out hMpq)) {
             for(int i = 0; i < fileList.Count; i++) {
                 var file = fileList[i];

@@ -230,9 +230,6 @@ public class ImportFile {
         filePath = path;
         customFlag = custom;
         OrigPath = Path;
-
-        if(filePath.StartsWith(war3mapImported))
-            filePath = filePath.Substring(war3mapImported.Length);
     }
 
     public ImportFile(string path, string diskPath) {

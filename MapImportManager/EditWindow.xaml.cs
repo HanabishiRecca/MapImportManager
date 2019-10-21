@@ -7,7 +7,7 @@ namespace MapImportManager {
             Owner = parentWindow;
             InitializeComponent();
             thisFile = file;
-            PathBox.Text = thisFile.Path;
+            PathBox.Text = thisFile.FilePath;
             PathBox.TextChanged += (o, e) => changed = true;
         }
 
@@ -20,7 +20,7 @@ namespace MapImportManager {
 
         void SaveAndExit() {
             if(changed) {
-                thisFile.Path = PathBox.Text;
+                thisFile.FilePath = PathBox.Text;
                 DialogResult = thisFile.Changed = true;
             }
             Close();

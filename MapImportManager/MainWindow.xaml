@@ -38,7 +38,7 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="{x:Static p:Resources.PathTitle}" Binding="{Binding Path=Path}" Width="1*"/>
+                <DataGridTextColumn Header="{x:Static p:Resources.PathTitle}" Binding="{Binding Path=FilePath}" Width="1*"/>
                 <DataGridTextColumn Header="{x:Static p:Resources.DiskPathTitile}" Binding="{Binding Path=DiskPath}" Width="1*"/>
                 <DataGridTextColumn Header="{x:Static p:Resources.ChangedTitle}" Binding="{Binding Path=Changed, Converter={StaticResource boolConverter}}" Width="auto"/>
                 <DataGridTextColumn Header="{x:Static p:Resources.DeletedTitle}" Binding="{Binding Path=Deleted, Converter={StaticResource boolConverter}}" Width="auto"/>

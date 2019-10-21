@@ -178,7 +178,7 @@ namespace MapImportManager {
         void AppendList(List<ImportFile> newFiles) {
             for(int i = 0; i < newFiles.Count; i++) {
                 var file = newFiles[i];
-                var existing = currentFileList.Find(x => x.Path == file.Path);
+                var existing = currentFileList.Find(x => x.FilePath == file.FilePath);
                 if(existing == null) {
                     currentFileList.Add(file);
                 } else {

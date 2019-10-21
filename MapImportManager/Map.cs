@@ -5,10 +5,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 static class Map {
-    const byte
-        CustomFlag = 0x0D,
-        NulByte = 0x00;
-
     static readonly ArchType[] archTypes = {
         new ArchType { DetectFile = "war3map.j", ImpFile = "war3map.imp" },
         new ArchType { DetectFile = "war3campaign.w3f", ImpFile = "war3campaign.imp" },
@@ -45,7 +41,7 @@ static class Map {
                         offset += sizeof(int);
                         result = new List<ImportFile>(fileCount);
                         for(int i = 0; i < fileCount; i++) {
-                            var bt = (version > 0) && ((Marshal.ReadByte(buffer, offset++) & 1) > NulByte);
+                            var bt = (version > 0) && ((Marshal.ReadByte(buffer, offset++) & 1) > 0);
                             var strLen = SeekStrLen(buffer, offset, fSize);
                             var data = new byte[strLen];
                             Marshal.Copy(buffer + offset, data, 0, data.Length);
@@ -76,10 +72,10 @@ static class Map {
                     StormLib.SFileRemoveFile(hMpq, file.OrigPath, 0u);
                 } else if(file.Changed) {
                     if(string.IsNullOrEmpty(file.DiskPath)) {
-                        StormLib.SFileRenameFile(hMpq, file.OrigPath, file.Path);
+                        StormLib.SFileRenameFile(hMpq, file.OrigPath, file.FilePath);
                     } else {
                         StormLib.SFileRemoveFile(hMpq, file.OrigPath, 0u);
-                        if(!StormLib.SFileAddFileEx(hMpq, file.DiskPath, file.Path, 0x80000200u, 0x2u, 0x2u)) {
+                        if(!StormLib.SFileAddFileEx(hMpq, file.DiskPath, file.FilePath, 0x80000200u, 0x2u, 0x2u)) {
                             failedFiles.Add(file.DiskPath);
                             file.Deleted = true;
                         }
@@ -140,10 +136,10 @@ static class Map {
                 writer.Write(fileList.Count);
                 for(int i = 0; i < fileList.Count; i++) {
                     var file = fileList[i];
-                    writer.Write(file.Custom ? CustomFlag : NulByte);
+                    writer.Write((byte)(file.Custom ? 0x0D : 0x00));
                     var str = Encoding.UTF8.GetBytes(file.InnerPath);
                     stream.Write(str, 0, str.Length);
-                    writer.Write(NulByte);
+                    writer.Write((byte)0x00);
                 }
                 writer.Close();
             }
@@ -181,7 +177,7 @@ static class Map {
             for(int i = 0; i < fileList.Count; i++) {
                 var file = fileList[i];
                 if(!string.IsNullOrEmpty(file.OrigPath)) {
-                    var fp = Path.Combine(destPath, file.Path);
+                    var fp = Path.Combine(destPath, file.FilePath);
                     Directory.CreateDirectory(Path.GetDirectoryName(fp));
                     StormLib.SFileExtractFile(hMpq, file.OrigPath, fp, 0u);
                 }
@@ -201,18 +197,11 @@ static class Map {
 }
 
 public class ImportFile {
-    const string war3mapImported = @"war3mapImported\";
-
-    public string Path {
-        get => (customFlag ? filePath : $"{war3mapImported}{filePath}");
+    public string FilePath {
+        get => customFlag ? filePath : $@"war3mapImported\{filePath}";
         set {
-            if(value.StartsWith(war3mapImported)) {
-                filePath = value.Substring(war3mapImported.Length);
-                customFlag = false;
-            } else {
-                filePath = value;
-                customFlag = true;
-            }
+            filePath = value;
+            customFlag = true;
         }
     }
 
@@ -229,7 +218,11 @@ public class ImportFile {
     public ImportFile(string path, bool custom) {
         filePath = path;
         customFlag = custom;
-        OrigPath = Path;
+
+        if(!customFlag)
+            filePath = Path.GetFileName(filePath);
+
+        OrigPath = FilePath;
     }
 
     public ImportFile(string path, string diskPath) {

@@ -1,7 +1,7 @@
 ﻿<Application x:Class="MapImportManager.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="MainWindow.xaml">
+             Startup="Init">
     <Application.Resources>
         <Image x:Key="OpenIcon" Source="images/open.png"></Image>
         <Image x:Key="SaveIcon" Source="images/save.png"></Image>

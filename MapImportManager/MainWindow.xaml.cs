@@ -71,7 +71,10 @@ namespace MapImportManager {
                 LoadList(mapSelectDialog.FileName);
         }
 
-        void LoadList(string mapPath) {
+        public void LoadList(string mapPath) {
+            if(!File.Exists(mapPath))
+                return;
+
             var list = Map.GetImportList(mapPath);
             if(list == null) {
                 ShowError(Properties.Resources.OpenMapError);

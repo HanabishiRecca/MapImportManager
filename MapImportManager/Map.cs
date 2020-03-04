@@ -65,6 +65,14 @@ static class Map {
         var saved = true;
         IntPtr hMpq;
         if(saved &= StormLib.SFileOpenArchive(mapPath, 0u, 0u, out hMpq)) {
+            var hashtableSize = 32u;
+            var fileCount = (uint)fileList.Count + hashtableSize;
+
+            while(hashtableSize < fileCount)
+                hashtableSize *= 2;
+
+            StormLib.SFileSetMaxFileCount(hMpq, hashtableSize);
+
             var failedFiles = new List<string>();
             for(int i = 0; (i < fileList.Count) && saved; i++) {
                 var file = fileList[i];
@@ -280,4 +288,7 @@ static class StormLib {
 
     [DllImport("stormlib.dll", ExactSpelling = true, SetLastError = true, ThrowOnUnmappableChar = false)]
     public static extern bool SFileExtractFile(IntPtr hMpq, [MarshalAs(UnmanagedType.LPStr)] string szToExtract, [MarshalAs(UnmanagedType.LPTStr)] string szExtracted, uint dwSearchScope);
+
+    [DllImport("stormlib.dll", ExactSpelling = true, SetLastError = true, ThrowOnUnmappableChar = false)]
+    public static extern bool SFileSetMaxFileCount(IntPtr hMpq, uint dwMaxFileCount);
 }
